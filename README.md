@@ -1,2 +1,2 @@
 # vorac
-Voice Recognition and Classification on a [MICROCONTROLLER]
+**Vo**ice **R**ecognition **A**nd **C**lassification on a [MICROCONTROLLER]
