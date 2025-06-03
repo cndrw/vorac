@@ -2,6 +2,7 @@ import numpy as np
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
 import pandas as pd
+from phoneme import Phoneme
 
 def knn_distance(a, b):
     """Berechnet die euklidische Distanz zwischen zwei Vektoren."""
@@ -34,10 +35,10 @@ def knn_classify(data_set : list, features, k):
 
 
 # 1. WAV-Datei laden
-samplerate, data = wavfile.read("audios/i.wav")
+samplerate, data = wavfile.read("audios/phoneme/i.wav")
 
-a_data = pd.read_csv("phoneme/a.csv")
-i_data = pd.read_csv("phoneme/i.csv")
+a = Phoneme("a")
+i = Phoneme("i")
 
 # 2. Nur ein Kanal verwenden (z. B. linker Kanal bei Stereo)
 if len(data.shape) == 2:
@@ -60,7 +61,7 @@ top_indices = np.argsort(yf_filtered)[-n:][::-1]  # sortiert absteigend
 yf_filtered = np.sort([yf_filtered[i] for i in top_indices])
 xf_filtered = np.sort([xf_filtered[i] for i in top_indices])
 
-res = knn_classify([a_data, i_data], yf_filtered, k=3)
+res = knn_classify([a.data, i.data], yf_filtered, k=3)
 print(res)
 
 # 5. Plotten (optional)
