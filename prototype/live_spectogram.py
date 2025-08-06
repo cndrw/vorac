@@ -43,20 +43,25 @@ try:
         if chunk_counter < RATE / CHUNK: 
             continue
         
-        Y = np.abs(librosa.stft(audio_buffer[len(audio_buffer) // 2:], n_fft=N_FFT, hop_length=HOP_LENGTH))
-        spectogram_db = librosa.amplitude_to_db(Y)
-        spec_buffer.append(spectogram_db)
+        mel_spec = librosa.feature.melspectrogram(
+            y=audio_buffer[len(audio_buffer) // 2:],
+            sr=RATE,
+            n_fft=N_FFT,
+            hop_length=HOP_LENGTH,
+            n_mels=40)
+
+        mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
+        spec_buffer.append(mel_spec_db)
 
         ax.clear()
         img = librosa.display.specshow(
             np.concatenate(spec_buffer, axis=1),
             sr=RATE,
-            hop_length=HOP_LENGTH,
+            # hop_length=HOP_LENGTH,
             x_axis='time',
-            y_axis='log',
+            y_axis='mel',
             ax=ax,
-            vmin=vmin,
-            vmax=vmax)
+            )
         ax.set_title('Live Spectrogram')
 
         plt.pause(0.01)
