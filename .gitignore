@@ -2,3 +2,4 @@ prototype/__pycache__/*
 TODO.md
 prototype/data 
 prototype/audios
+prototype/models/*

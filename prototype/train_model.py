@@ -1,12 +1,15 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import librosa
-from textgrid import TextGrid
-from pathlib import Path
+import pickle
 from dataclasses import dataclass
-import matplotlib.pyplot as plt
+from textgrid import TextGrid
+from hmmlearn import hmm
+from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
 SAMPLE_RATE = 22050
+FFT_SIZE = 512 
 
 @dataclass
 class Phoneme:
@@ -38,23 +41,41 @@ def extract_audio_segments(file_path: Path, phonemes : list[Phoneme]) -> list[np
 def convert_to_mfcc(audio_segments: list[np.ndarray]) -> list[np.ndarray]:
     mfccs = []
     for audio in audio_segments:
-        mfcc = librosa.feature.mfcc(y=audio, sr=SAMPLE_RATE, n_mfcc=13)
-        mfccs.append(mfcc)
+        mfcc = librosa.feature.mfcc(y=audio, sr=SAMPLE_RATE, n_fft=FFT_SIZE, n_mfcc=13)
+        mfccs.append(mfcc.T)
+
     return mfccs
 
+def extract_data(data_dir: Path, phoneme: str) -> list[np.ndarray]:
+    all_mfccs = []
 
-def train_model(data_dir: Path, phoneme: str) -> None:
-    i = 0
     for file in data_dir.iterdir():
-        if file.suffix == ".TextGrid" and i < 1:
-            i += 1
+        if file.suffix == ".TextGrid":
             phonemes = read_textgrid(file, phoneme)
             audio_segments = extract_audio_segments(file.with_suffix('.flac'), phonemes)
             mfccs = convert_to_mfcc(audio_segments)
+            all_mfccs += mfccs
 
+    return all_mfccs
 
-# 5. MFCC values labeln mit dem phonem
+def train_models(data_dir: Path, phoneme: str) -> dict[str, hmm.GaussianHMM]:
+    data = { phoneme: extract_data(data_dir, phoneme) }
+
+    models = {}
+    for phoneme, mfccs in data.items():
+        model = hmm.GaussianHMM(n_components=3, covariance_type="diag", n_iter=100)
+        model.fit(np.vstack(mfccs), lengths=[mfcc.shape[0] for mfcc in mfccs])
+        models[phoneme] = model
+
+    return models
+
 # 6. Training des Modells mit den MFCC-Features und den Labels
 
 training_data = ROOT_DIR / "data"
-train_model(training_data, "n")
+models = train_models(training_data, "n")
+
+model_dir = ROOT_DIR / "models"
+with open(model_dir / "n_model.pkl", "wb") as f:
+    pickle.dump(models['n'], f)
+
+print("✅ Modelle trainiert.")
