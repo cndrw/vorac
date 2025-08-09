@@ -74,8 +74,8 @@ def train_models(data_dir: Path, phoneme: str) -> dict[str, hmm.GaussianHMM]:
 training_data = ROOT_DIR / "data"
 models = train_models(training_data, "n")
 
+print("Models trained successfully.")
+
 model_dir = ROOT_DIR / "models"
 with open(model_dir / "n_model.pkl", "wb") as f:
     pickle.dump(models['n'], f)
-
-print("✅ Modelle trainiert.")
