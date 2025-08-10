@@ -3,3 +3,5 @@ TODO.md
 prototype/data 
 prototype/audios
 prototype/models/*
+prototype/phoneme_recogniton.py
+prototype/testing.py

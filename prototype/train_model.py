@@ -24,8 +24,8 @@ def extract_data(data_dir: Path, phoneme: str) -> list[np.ndarray]:
 
     return all_mfccs
 
-def train_models(data_dir: Path, phoneme: str) -> dict[str, hmm.GaussianHMM]:
-    data = { phoneme: extract_data(data_dir, phoneme) }
+def train_models(data_dir: Path, phoneme: list[str]) -> dict[str, hmm.GaussianHMM]:
+    data = { p: extract_data(data_dir, p) for p in phoneme }
 
     models = {}
     for phoneme, mfccs in data.items():
@@ -36,7 +36,11 @@ def train_models(data_dir: Path, phoneme: str) -> dict[str, hmm.GaussianHMM]:
     return models
 
 training_data = ROOT_DIR / "data" / "198"
-models = train_models(training_data, "n")
+
+# list with all phonemes
+PHONEMES = ['n', 's', 'p']
+
+models = train_models(training_data, PHONEMES)
 
 print("Models trained successfully.")
 

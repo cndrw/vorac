@@ -17,13 +17,24 @@ if str(args.directory) == "Error":
 validation_dir = Path(args.directory)
 
 with open(ROOT / "models" / "models.pkl", "rb") as f:
-    model : hmm.GaussianHMM = pickle.load(f)["n"]
+    models : hmm.GaussianHMM = pickle.load(f)
 
-mfccs = vru.generate_mfccs_from_textgrid(file="19-198-0027", data_dir=validation_dir, phoneme=u"n")
+files = sorted(set([file.stem for file in validation_dir.iterdir()]))[:-2] # exlude output dir and .trans file
 
+PHONEMES = ['n', 's', 'p']   
 
-for mfcc in mfccs:
-    log_likelihood = model.score(mfcc, lengths=mfcc.shape[0])
-    print(f"Log likelihood for segment: {log_likelihood}")
+all_tests = []
+for file in files:
+    mfccs = vru.generate_mfccs_from_textgrid(file=file, data_dir=validation_dir, phoneme=u"p")
+    all_tests.append(mfccs)
 
-# 3. modell mit allen segmenten testen
+total_test = sum(len(mfcc) for mfcc in all_tests)
+print(f"Testing on {len(all_tests)} files with {total_test} occurences...")
+
+count = 0
+for i, mfcc in enumerate(all_tests):
+    for j, segment in enumerate(mfcc):
+        scores = { phoneme: model.score(segment) for phoneme, model in models.items() }
+        best_phoneme = max(scores, key=scores.get)
+        count += 1
+        print(f"Best fit [{count:03}/{total_test}]: {best_phoneme}")
