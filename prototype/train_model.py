@@ -1,9 +1,6 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import voracutils as vru
+import numpy as np
 import pickle
-from dataclasses import dataclass
-from textgrid import TextGrid
 from hmmlearn import hmm
 from pathlib import Path
 
@@ -57,6 +54,7 @@ PHONEMES = [
     u"ɡʷ", u"ɪ", u"ɫ", u"ɫ̩", u"ɱ", u"ɲ", u"ɹ", u"ɾ", u"ɾʲ", u"ɾ̃",
     u"ʃ", u"ʉ", u"ʉː", u"ʊ", u"ʎ", u"ʒ", u"ʔ", u"θ"
 ]
+
 
 
 models = train_models(training_data, PHONEMES)

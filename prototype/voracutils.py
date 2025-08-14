@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from textgrid import TextGrid
 from pathlib import Path
 
-SAMPLE_RATE = 22050
-FFT_SIZE = 512 
+SAMPLE_RATE = 16_000
+FRAME_SIZE = 320 
+FFT_SIZE = 512
+HOP_LENGTH = 100 
 
 @dataclass
 class Phoneme:
@@ -37,7 +39,10 @@ def extract_audio_segments(file_path: Path, phonemes : list[Phoneme]) -> list[np
 def convert_to_mfcc(audio_segments: list[np.ndarray]) -> list[np.ndarray]:
     mfccs = []
     for audio in audio_segments:
-        mfcc = librosa.feature.mfcc(y=audio, sr=SAMPLE_RATE, n_fft=FFT_SIZE, n_mfcc=13)
+        mfcc = librosa.feature.mfcc(
+            y=audio, sr=SAMPLE_RATE, win_length=FRAME_SIZE,
+            n_fft=FFT_SIZE, hop_length=HOP_LENGTH, n_mfcc=13
+        )
         mfccs.append(mfcc.T)
 
     return mfccs

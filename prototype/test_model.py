@@ -30,6 +30,7 @@ for phoneme in phonemes:
 
 print(f"Testing with {len(files)} files")
 
+total_passed = 0
 for phoneme, mfccs in tests.items():
     passed_counter = 0
     for mfcc in mfccs:
@@ -37,6 +38,10 @@ for phoneme, mfccs in tests.items():
         best_phoneme = max(scores, key=scores.get)
 
         passed_counter += int(best_phoneme == phoneme)
+    total_passed += passed_counter
 
     print(f"Testing '{phoneme}': Passed {passed_counter}/{len(mfccs)} {'️️✔️' if passed_counter > (len(mfccs) // 2) else '❌'}")
 
+
+passed_percentage = total_passed / sum(len(mfccs) for mfccs in tests.values()) * 100
+print(f"Result: {passed_percentage:.2f}% of tests passed")
