@@ -5,3 +5,4 @@ prototype/audios
 prototype/models/*
 prototype/phoneme_recogniton.py
 prototype/testing.py
+prototype/tmp.py

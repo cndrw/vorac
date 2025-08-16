@@ -7,26 +7,24 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 
 def extract_data(data_dir: Path, phoneme: str) -> list[np.ndarray]:
-    all_mfccs = []
+    feature_collection = []
     files = sorted(set([file.stem for file in data_dir.iterdir()]))[:-2] # exlude output dir and .trans file
 
     total_files = len(files)
     ending = '\r'
 
     for i, file in enumerate(files):
-        mfccs = vru.generate_mfccs_from_textgrid(file, data_dir, phoneme)
-        all_mfccs += mfccs
+        features = vru.generate_features_from_textgrid(file, data_dir, phoneme)
+        feature_collection += features
 
         if i == total_files - 1:
             ending = '\n'
-        print(f"File {i + 1}/{total_files} processed for '{phoneme}' ({len(all_mfccs)} samples)", end=ending)
+        print(f"File {i + 1}/{total_files} processed for '{phoneme}' ({len(feature_collection)} samples)", end=ending)
 
-    return all_mfccs
+    return feature_collection
 
 def train_models(data_dir: Path, phoneme: list[str]) -> dict[str, hmm.GaussianHMM]:
     data = { p: extract_data(data_dir, p) for p in phoneme }
-
-    # data = { p: mfccs for p, mfccs in data.items() if len(mfccs) > 0 }
 
     min_samples = 20
     for key in list(data.keys()):
@@ -35,9 +33,9 @@ def train_models(data_dir: Path, phoneme: list[str]) -> dict[str, hmm.GaussianHM
             print(f"Removed phoneme '{key}' due to less than {min_samples} data samples.")
 
     models = {}
-    for phoneme, mfccs in data.items():
+    for phoneme, features in data.items():
         model = hmm.GaussianHMM(n_components=3, covariance_type="diag", n_iter=100)
-        model.fit(np.vstack(mfccs), lengths=[mfcc.shape[0] for mfcc in mfccs])
+        model.fit(np.vstack(features), lengths=[feature.shape[0] for feature in features])
         models[phoneme] = model
 
     return models

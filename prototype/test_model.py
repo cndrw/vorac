@@ -25,23 +25,22 @@ phonemes = list(models.keys())
 tests = { p: [] for p in phonemes }
 for phoneme in phonemes:
     for file in files:
-        mfccs = vru.generate_mfccs_from_textgrid(file=file, data_dir=validation_dir, phoneme=phoneme)
-        tests[phoneme] += mfccs
+        features = vru.generate_features_from_textgrid(file=file, data_dir=validation_dir, phoneme=phoneme)
+        tests[phoneme] += features
 
 print(f"Testing with {len(files)} files")
 
 total_passed = 0
-for phoneme, mfccs in tests.items():
+for phoneme, features in tests.items():
     passed_counter = 0
-    for mfcc in mfccs:
-        scores = { phoneme: model.score(mfcc) for phoneme, model in models.items() }
+    for feature in features:
+        scores = { phoneme: model.score(feature) for phoneme, model in models.items() }
         best_phoneme = max(scores, key=scores.get)
 
         passed_counter += int(best_phoneme == phoneme)
     total_passed += passed_counter
 
-    print(f"Testing '{phoneme}': Passed {passed_counter}/{len(mfccs)} {'️️✔️' if passed_counter > (len(mfccs) // 2) else '❌'}")
+    print(f"Testing '{phoneme}': Passed {passed_counter}/{len(features)} {'️️✔️' if passed_counter > (len(features) // 2) else '❌'}")
 
-
-passed_percentage = total_passed / sum(len(mfccs) for mfccs in tests.values()) * 100
+passed_percentage = total_passed / sum(len(features) for features in tests.values()) * 100
 print(f"Result: {passed_percentage:.2f}% of tests passed")
